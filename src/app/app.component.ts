@@ -35,11 +35,8 @@ export class AppComponent implements OnInit {
   }
 
   send(event, inputElement: HTMLInputElement): void {
-    console.log(inputElement.value);
-
     event.preventDefault();
     event.stopPropagation();
-
     const input = {
       channelID: '1',
       author: this.username.trim(),
@@ -49,7 +46,6 @@ export class AppComponent implements OnInit {
       console.log('Send Message Success =>', val);
       inputElement.value = '';
     });
-
   }
 
   listMessages(): void {
