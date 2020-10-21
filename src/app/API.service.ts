@@ -7,6 +7,7 @@ import { Observable } from "zen-observable-ts";
 
 export type CreateMessageInput = {
   id?: string | null;
+  channelID: string;
   author: string;
   body: string;
   createdAt?: string | null;
@@ -14,6 +15,7 @@ export type CreateMessageInput = {
 };
 
 export type ModelMessageConditionInput = {
+  channelID?: ModelIDInput | null;
   author?: ModelStringInput | null;
   body?: ModelStringInput | null;
   createdAt?: ModelStringInput | null;
@@ -23,7 +25,7 @@ export type ModelMessageConditionInput = {
   not?: ModelMessageConditionInput | null;
 };
 
-export type ModelStringInput = {
+export type ModelIDInput = {
   ne?: string | null;
   eq?: string | null;
   le?: string | null;
@@ -62,30 +64,7 @@ export type ModelSizeInput = {
   between?: Array<number | null> | null;
 };
 
-export type UpdateMessageInput = {
-  id: string;
-  author?: string | null;
-  body?: string | null;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-};
-
-export type DeleteMessageInput = {
-  id?: string | null;
-};
-
-export type ModelMessageFilterInput = {
-  id?: ModelIDInput | null;
-  author?: ModelStringInput | null;
-  body?: ModelStringInput | null;
-  createdAt?: ModelStringInput | null;
-  updatedAt?: ModelStringInput | null;
-  and?: Array<ModelMessageFilterInput | null> | null;
-  or?: Array<ModelMessageFilterInput | null> | null;
-  not?: ModelMessageFilterInput | null;
-};
-
-export type ModelIDInput = {
+export type ModelStringInput = {
   ne?: string | null;
   eq?: string | null;
   le?: string | null;
@@ -100,6 +79,46 @@ export type ModelIDInput = {
   attributeType?: ModelAttributeTypes | null;
   size?: ModelSizeInput | null;
 };
+
+export type UpdateMessageInput = {
+  id: string;
+  channelID?: string | null;
+  author?: string | null;
+  body?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
+export type DeleteMessageInput = {
+  id?: string | null;
+};
+
+export type ModelMessageFilterInput = {
+  id?: ModelIDInput | null;
+  channelID?: ModelIDInput | null;
+  author?: ModelStringInput | null;
+  body?: ModelStringInput | null;
+  createdAt?: ModelStringInput | null;
+  updatedAt?: ModelStringInput | null;
+  and?: Array<ModelMessageFilterInput | null> | null;
+  or?: Array<ModelMessageFilterInput | null> | null;
+  not?: ModelMessageFilterInput | null;
+};
+
+export type ModelStringKeyConditionInput = {
+  eq?: string | null;
+  le?: string | null;
+  lt?: string | null;
+  ge?: string | null;
+  gt?: string | null;
+  between?: Array<string | null> | null;
+  beginsWith?: string | null;
+};
+
+export enum ModelSortDirection {
+  ASC = "ASC",
+  DESC = "DESC"
+}
 
 export type CreateMessageMutation = {
   __typename: "Message";
@@ -142,6 +161,20 @@ export type GetMessageQuery = {
 };
 
 export type ListMessagesQuery = {
+  __typename: "ModelMessageConnection";
+  items: Array<{
+    __typename: "Message";
+    id: string;
+    channelID: string;
+    author: string;
+    body: string;
+    createdAt: string | null;
+    updatedAt: string | null;
+  } | null> | null;
+  nextToken: string | null;
+};
+
+export type MessagesByChannelIdQuery = {
   __typename: "ModelMessageConnection";
   items: Array<{
     __typename: "Message";
@@ -321,6 +354,53 @@ export class APIService {
       graphqlOperation(statement, gqlAPIServiceArguments)
     )) as any;
     return <ListMessagesQuery>response.data.listMessages;
+  }
+  async MessagesByChannelId(
+    channelID?: string,
+    createdAt?: ModelStringKeyConditionInput,
+    sortDirection?: ModelSortDirection,
+    filter?: ModelMessageFilterInput,
+    limit?: number,
+    nextToken?: string
+  ): Promise<MessagesByChannelIdQuery> {
+    const statement = `query MessagesByChannelId($channelID: ID, $createdAt: ModelStringKeyConditionInput, $sortDirection: ModelSortDirection, $filter: ModelMessageFilterInput, $limit: Int, $nextToken: String) {
+        messagesByChannelID(channelID: $channelID, createdAt: $createdAt, sortDirection: $sortDirection, filter: $filter, limit: $limit, nextToken: $nextToken) {
+          __typename
+          items {
+            __typename
+            id
+            channelID
+            author
+            body
+            createdAt
+            updatedAt
+          }
+          nextToken
+        }
+      }`;
+    const gqlAPIServiceArguments: any = {};
+    if (channelID) {
+      gqlAPIServiceArguments.channelID = channelID;
+    }
+    if (createdAt) {
+      gqlAPIServiceArguments.createdAt = createdAt;
+    }
+    if (sortDirection) {
+      gqlAPIServiceArguments.sortDirection = sortDirection;
+    }
+    if (filter) {
+      gqlAPIServiceArguments.filter = filter;
+    }
+    if (limit) {
+      gqlAPIServiceArguments.limit = limit;
+    }
+    if (nextToken) {
+      gqlAPIServiceArguments.nextToken = nextToken;
+    }
+    const response = (await API.graphql(
+      graphqlOperation(statement, gqlAPIServiceArguments)
+    )) as any;
+    return <MessagesByChannelIdQuery>response.data.messagesByChannelID;
   }
   OnCreateMessageListener: Observable<
     OnCreateMessageSubscription

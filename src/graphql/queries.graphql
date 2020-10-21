@@ -26,3 +26,30 @@ query ListMessages(
     nextToken
   }
 }
+query MessagesByChannelId(
+  $channelID: ID
+  $createdAt: ModelStringKeyConditionInput
+  $sortDirection: ModelSortDirection
+  $filter: ModelMessageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  messagesByChannelID(
+    channelID: $channelID
+    createdAt: $createdAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      channelID
+      author
+      body
+      createdAt
+      updatedAt
+    }
+    nextToken
+  }
+}
