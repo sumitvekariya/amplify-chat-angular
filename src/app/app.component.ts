@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router, RouterEvent } from '@angular/router';
+import { NavigationEnd, Router, RouterEvent } from '@angular/router';
 import { APIService } from './API.service';
 
 @Component({
@@ -14,7 +14,6 @@ export class AppComponent implements OnInit {
 
   constructor(
     private api: APIService,
-    // private activatedRoute: ActivatedRouteSnapshot,
     private router: Router
   ) { }
 
@@ -38,7 +37,7 @@ export class AppComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     const input = {
-      channelID: '1',
+      channelID: '2',
       author: this.username.trim(),
       body: inputElement.value.trim()
     };
@@ -49,7 +48,7 @@ export class AppComponent implements OnInit {
   }
 
   listMessages(): void {
-    this.api.MessagesByChannelId('1').then((val) => {
+    this.api.MessagesByChannelId('2').then((val) => {
       console.log(val);
       this.messages = val.items;
     });
