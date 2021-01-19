@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterEvent } from '@angular/router';
+import { select, Store } from '@ngrx/store';
+import { delay } from 'rxjs/operators';
 import { APIService } from './API.service';
+import { addMessageToList, loadMessages, sendMessage } from './store/actions/actions';
+import { IChatState } from './store/reducers/reducer';
+import { selectMessages } from './store/selectors/selectors';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +19,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private api: APIService,
-    private router: Router
+    private router: Router,
+    private store: Store<IChatState>
   ) { }
 
   ngOnInit(): void {
@@ -41,16 +47,19 @@ export class AppComponent implements OnInit {
       author: this.username.trim(),
       body: inputElement.value.trim()
     };
-    this.api.CreateMessage(input).then((val) => {
-      console.log('Send Message Success =>', val);
-      inputElement.value = '';
-    });
+
+    this.store.dispatch(sendMessage({ message: input }));
+    inputElement.value = '';
   }
 
   listMessages(): void {
-    this.api.MessagesByChannelId('2').then((val) => {
-      console.log(val);
-      this.messages = val.items;
+    this.store.dispatch(loadMessages({ channelId: '2' }));
+    this.store.pipe(
+      select(selectMessages),
+      delay(10)
+    ).subscribe((messages) => {
+      console.log(messages);
+      this.messages = messages;
     });
   }
 
@@ -59,7 +68,7 @@ export class AppComponent implements OnInit {
       {
         next: (val: any) => {
           console.log(val);
-          this.messages.push(val.value.data.onCreateMessage);
+          this.store.dispatch(addMessageToList({ message: val.value.data.onCreateMessage }));
         }
       }
     );
