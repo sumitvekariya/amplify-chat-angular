@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterEvent } from '@angular/router';
 import { select, Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { APIService } from './API.service';
 import { addMessageToList, loadMessages, sendMessage } from './store/actions/actions';
@@ -15,7 +16,7 @@ import { selectMessages } from './store/selectors/selectors';
 export class AppComponent implements OnInit {
   title = 'amplify-chat-angular';
   username: string;
-  messages = [];
+  messages$: Observable<any[]>;
 
   constructor(
     private api: APIService,
@@ -54,13 +55,10 @@ export class AppComponent implements OnInit {
 
   listMessages(): void {
     this.store.dispatch(loadMessages({ channelId: '2' }));
-    this.store.pipe(
+    this.messages$ = this.store.pipe(
       select(selectMessages),
       delay(10)
-    ).subscribe((messages) => {
-      console.log(messages);
-      this.messages = messages;
-    });
+    )
   }
 
   onCreateMessage(): void {

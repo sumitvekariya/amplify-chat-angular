@@ -2,10 +2,12 @@
   <div class="container">
     <div class="messages">
       <div class="messages-scroller">
-        <ng-container *ngFor="let message of messages">
-          <div [ngClass]="message.author === username ? 'message me' : 'message'">
-            {{message.body}}
-          </div>
+        <ng-container *ngIf="messages$ | async as messages">
+          <ng-container *ngFor="let message of messages">
+            <div [ngClass]="message.author === username ? 'message me' : 'message'">
+              {{message.body}}
+            </div>
+          </ng-container>
         </ng-container>
       </div>
 
